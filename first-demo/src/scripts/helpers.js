@@ -10,4 +10,14 @@ const map = (value, start1, stop1, start2, stop2) => {
   return (value - start1) / (stop1 - start1) * (stop2 - start2) + start2
 }
 
-export { radians, distance, map };
+const hexToRgbTreeJs = (hex) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+  return result ? {
+    r: parseInt(result[1], 16) / 255,
+    g: parseInt(result[2], 16) / 255,
+    b: parseInt(result[3], 16) / 255
+  } : null;
+}
+
+export { radians, distance, map, hexToRgbTreeJs };

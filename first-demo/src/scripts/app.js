@@ -1,13 +1,16 @@
 import 'styles/index.scss'
-import Cone from './elements/cone'
-import Torus from './elements/torus'
-import Cylinder from './elements/cylinder'
+// import Cone from './elements/cone'
+// import Torus from './elements/torus'
+// import Cylinder from './elements/cylinder'
 import { radians, map, distance } from './helpers'
 import Box from '../../../second-demo/src/scripts/elements/box'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 export default class App {
   setup () {
+
+    this.backgroundColor = '#191919';
+
     this.gutter = { size: 4 }
     this.meshes = []
     this.grid = { rows: 11, cols: 7 }
@@ -35,6 +38,17 @@ export default class App {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
     document.body.appendChild(this.renderer.domElement)
+  }
+  
+  addControls () {
+
+    this.gui = new dat.GUI();
+
+    const gui = this.gui.addFolder('Background');
+
+    gui.addColor(this, 'backgroundColor').onChange((color) => {
+      document.body.style.backgroundColor = color;
+    });
   }
 
   createCamera () {
@@ -251,6 +265,8 @@ export default class App {
     this.setup()
 
     this.createScene()
+
+    this.addControls()
 
     this.createCamera()
     
