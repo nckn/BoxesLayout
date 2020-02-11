@@ -15,7 +15,7 @@
     "url": "https://github.com/iondrimba/interactive-repulsion-effect.git"
   },
   "scripts": {
-    "start": "webpack-dev-server --open --config webpack.dev.js",
+    "start": "webpack-dev-server --open --config webpack.dev.js --host 0.0.0.0",
     "build": "webpack --config webpack.prod.js"
   },
   "author": "Ion D. Filho <iondrimba@gmail.com> (https://iondrimbafilho.me)",

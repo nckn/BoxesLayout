@@ -2,7 +2,7 @@ import 'styles/index.scss'
 // import Cone from './elements/cone'
 // import Torus from './elements/torus'
 // import Cylinder from './elements/cylinder'
-import { radians, map, distance, hexToRgbTreeJs } from './helpers';
+import { radians, map, distance, hexToRgbTreeJs } from './helpers'
 import Box from '../../../second-demo/src/scripts/elements/box'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
@@ -59,7 +59,7 @@ export default class App {
       window.innerWidth / window.innerHeight,
       1
     )
-    this.camera.position.set(0, 65, 0)
+    this.camera.position.set(20, 20, 20)
     this.camera.rotation.x = -1.57
 
     this.scene.add(this.camera)
@@ -85,26 +85,60 @@ export default class App {
   }
 
   addAmbientLight () {
-    const obj = { color: '#2900af' };
-    const light = new THREE.AmbientLight(obj.color, 1);
+    const obj = { color1: '#eed4aa', color2: '#fb985c' }
+    const ambLight = new THREE.AmbientLight(obj.color1, 1)
+    const ambLight2 = new THREE.AmbientLight(obj.color2, 1)
     // const light = new THREE.AmbientLight('#ffffff', 1)
+    this.scene.add(ambLight)
+    this.scene.add(ambLight2)
 
-    this.scene.add(light)
+    const gui = this.gui.addFolder('Ambient Light 1')
 
-    const gui = this.gui.addFolder('Ambient Light');
-
-    gui.addColor(obj, 'color').onChange((color) => {
-      light.color = hexToRgbTreeJs(color);
-    });
+    gui.addColor(obj, 'color1').onChange(color => {
+      ambLight.color = hexToRgbTreeJs(color)
+    })
   }
 
   addSpotLight () {
-    const spLight = new THREE.SpotLight('#7bccd7', 1, 1000)
+    // Spot light
+    // const spLight = new THREE.SpotLight('#7bccd7', 1, 1000)
 
-    spLight.position.set(0, 27, 0)
-    spLight.castShadow = true
+    // spLight.position.set(0, 27, 0)
+    // spLight.castShadow = true
 
-    this.scene.add(spLight)
+    // this.scene.add(spLight)
+
+    // Point light
+    var light = new THREE.PointLight(0xff0000, 1, 1000)
+    light.position.set(0, 10, 0)
+    this.scene.add(light)
+  }
+
+  addOtherLight () {
+    // Hemispheric light
+    var hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6)
+    hemiLight.color.setHSL(0.6, 1, 0.6)
+    hemiLight.groundColor.setHSL(0.095, 1, 0.75)
+    hemiLight.position.set(0, 50, 0)
+    this.scene.add(hemiLight)
+
+    var dirLight = new THREE.DirectionalLight(0xffffff, 1)
+    dirLight.color.setHSL(0.1, 1, 0.95)
+    dirLight.position.set(-1, 1.75, 1)
+    dirLight.position.multiplyScalar(30)
+    this.scene.add(dirLight)
+
+    dirLight.castShadow = true
+
+    var d = 50
+
+    dirLight.shadow.camera.left = -d
+    dirLight.shadow.camera.right = d
+    dirLight.shadow.camera.top = d
+    dirLight.shadow.camera.bottom = -d
+
+    dirLight.shadow.camera.far = 3500
+    dirLight.shadow.bias = -0.0001
   }
 
   addRectLight () {
@@ -168,7 +202,7 @@ export default class App {
           // mesh.position.z = row + row * (index + 0.25)
 
           mesh.position.y = 0
-          mesh.position.x = col / 2 
+          mesh.position.x = col / 2
           mesh.position.z = row / 2
 
           // mesh.rotation.x = geometry.rotationX
@@ -194,7 +228,7 @@ export default class App {
 
     // const centerX = -(this.grid.cols / 2) * this.gutter.size - 1
     // const centerZ = -(this.grid.rows / 2) - 0.8
-    
+
     const centerX = -this.grid.cols / 4
     const centerZ = -this.grid.rows / 4
 
@@ -302,6 +336,8 @@ export default class App {
 
     this.addAmbientLight()
 
+    this.addOtherLight()
+
     this.addSpotLight()
 
     this.addRectLight()
@@ -337,6 +373,8 @@ export default class App {
 
   animate () {
     this.draw()
+
+    // console.log('camera pos: ' + JSON.stringify(this.camera.position))
 
     this.renderer.render(this.scene, this.camera)
 
