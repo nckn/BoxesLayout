@@ -180,3 +180,26 @@ a:focus {
 		justify-content: center;
 	}
 }
+
+// Konrad Studio
+
+$time-b: 0.35s;
+
+.button {
+	position: absolute;
+	width: 24px;
+	height: 24px;
+	-webkit-transition: all $time-b ease-in-out;
+	transition: all $time-b ease-in-out;
+	opacity: 0.5;
+	border-radius: 2px;
+	cursor: pointer;
+	// background: lighten($color: #000000, $amount: 10);
+	&.w-icon {
+		background-size: cover;	
+		background-repeat: no-repeat;	
+	}
+	&:hover {
+		opacity: 1;
+	}
+}

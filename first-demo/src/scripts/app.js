@@ -5,6 +5,7 @@ import 'styles/index.scss'
 import { radians, map, distance, hexToRgbTreeJs } from './helpers'
 import Box from '../../../second-demo/src/scripts/elements/box'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import Button from './elements/button'
 
 export default class App {
   setup () {
@@ -30,8 +31,26 @@ export default class App {
 
     this.raycaster = new THREE.Raycaster()
 
+    this.buttons = [
+      {name: 'line', color: 'red', pos: {x: 20, y: 20}, img: 'icon-center-vertically.svg'},
+      {name: 'grid', color: 'green', pos: {x: 20, y: 60}, img: 'icon-center-vertically.svg'}
+    ]
+
   }
   
+  setupButtons () {
+    var bA = this.buttons; // Button array
+    for (var i = 0; i < bA.length; i++) {
+      var button = new Button({
+        color: bA[i].color,
+        pos: bA[i].pos,
+        img: bA[i].img
+      });
+      this.buttons.domElem = button;
+    }
+    // document.body.appendChild(button)
+  }
+
   drawGuides() {
     var axesHelper = new THREE.AxesHelper( 5 );
     this.scene.add( axesHelper )
@@ -334,7 +353,7 @@ export default class App {
             // const scaleFactor = mesh.position.y / 1.2
             // const scale = scaleFactor < 1 ? 1 : scaleFactor
             const scaleVal = map(mouseDistance, 4, 0, 1, 2)
-            console.log(mouseDistance)
+            // console.log(mouseDistance)
             // const scale = (1 / y) * 0.1
             const scale = scaleVal
             TweenMax.to(obj.mesh.scale, 0.3, {
@@ -377,7 +396,7 @@ export default class App {
     }
     // No intersections
     else {
-      console.log('nope')
+      // console.log('nope')
       for (let row = 0; row < this.grid.rows; row++) {
         for (let index = 0; index < 1; index++) {
           const totalCols = this.getTotalRows(row)
@@ -447,6 +466,8 @@ export default class App {
     this.onMouseMove({ clientX: 0, clientY: 0 })
     // Draw guides
     this.drawGuides()
+    // Apply buttons
+    this.setupButtons()
   }
 
   onMouseMove ({ clientX, clientY }) {
