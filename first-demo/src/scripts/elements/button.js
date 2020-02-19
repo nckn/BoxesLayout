@@ -1,7 +1,8 @@
-import RoundedBoxGeometry from '../vendor/roundedBox';
+// import App from './scripts/app';
 
 export default class Button {
   constructor(_options) {
+    this.name = _options.name;
     this.size = 24;
     this.position = [];
     this.color = _options.color;
@@ -15,12 +16,13 @@ export default class Button {
   setup () {
     var button = document.createElement('div')
     button = document.createElement('div')
+    button.setAttribute('name', this.name)
     this.button = button
     document.body.appendChild(button)
     // Apply styling
     this.styling()
     // Setup eventlisteners
-    this.setupEventListeners()
+    // this.setupEventListeners()
   } 
   
   styling () {
@@ -33,18 +35,19 @@ export default class Button {
     btn.style.backgroundImage = `url(${this.baseUrl}${this.img}`;
   }
   
-  handleInteraction(evt) {
-    evt.preventDefault()
-    console.log('interacted')
-  }
+  // handleInteraction(evt) {
+  //   evt.preventDefault()
+  //   console.log('interacted')
+  //   // App.testThisShit()
+  // }
 
-  setupEventListeners () {
-    var self = this
-    var el = this.button
-    el.addEventListener('touchstart', self.handleInteraction)
-    el.addEventListener('click', self.handleInteraction)
-    // this.button.addEventListener
-  }
+  // setupEventListeners () {
+  //   var self = this
+  //   var el = this.button
+  //   el.addEventListener('touchstart', self.handleInteraction)
+  //   el.addEventListener('click', self.handleInteraction)
+  //   // this.button.addEventListener
+  // }
 
   init () {
     this.setup()

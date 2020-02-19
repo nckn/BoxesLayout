@@ -14,7 +14,7 @@ export default class App {
     this.gutter = { size: 4 } // Org 4
     this.meshes = []
     // this.grid = { rows: 20, cols: 20 }
-    this.grid = { cols: 5, rows: 1 }
+    this.grid = { cols: 8, rows: 1 }
     this.width = window.innerWidth
     this.height = window.innerHeight
     this.mouse3D = new THREE.Vector2()
@@ -32,21 +32,73 @@ export default class App {
     this.raycaster = new THREE.Raycaster()
 
     this.buttons = [
-      {name: 'line', color: 'red', pos: {x: 20, y: 20}, img: 'icon-center-vertically.svg'},
-      {name: 'grid', color: 'green', pos: {x: 20, y: 60}, img: 'icon-center-vertically.svg'}
+      {name: 'horizontal', color: 'green', pos: {x: 20, y: 20}, img: 'icon-center-horizontally.svg'},
+      {name: 'vertical', color: 'red', pos: {x: 20, y: 60}, img: 'icon-center-vertically.svg'}
     ]
+
+    this.layout = [true, false]
 
   }
   
+  changeLayout (target) { 
+    console.log(target.name)
+    var name = target.getAttribute('name')
+    switch (name) {
+      case 'horizontal':
+        console.log('line')
+        this.layout[1] = false
+        this.layout[0] = true
+        break;
+      case 'vertical':
+        console.log('grid')
+        this.layout[0] = false
+        this.layout[1] = true
+        break;
+      default:
+    }
+    // for (let row = 0; row < this.grid.rows; row++) {
+    //   for (let index = 0; index < 1; index++) {
+    //     const totalCols = this.getTotalRows(row)
+    //     for (let col = 0; col < totalCols; col++) {
+    //       const obj = new Object()
+    //       obj.mesh = this.meshes[row][col].mesh
+    //       obj.pos = this.meshes[row][col].positions
+    //       TweenMax.to(obj.mesh.position, 0.3, {
+    //         x: obj.pos[1].x,
+    //         y: obj.pos[1].y,
+    //         z: obj.pos[1].z
+    //       })
+    //     }
+    //   }
+    // }
+  }
+
+  // buttonWasClicked (evt) {
+  //   console.log('interacted')
+  //   evt.preventDefault()
+  //   this.changeLayout()
+  // }
+  
   setupButtons () {
+    var self = this
     var bA = this.buttons; // Button array
     for (var i = 0; i < bA.length; i++) {
       var button = new Button({
+        name: bA[i].name,
         color: bA[i].color,
         pos: bA[i].pos,
         img: bA[i].img
       });
       this.buttons.domElem = button;
+      var el = this.buttons.domElem.button;
+      el.addEventListener('click', (e) => {
+        e.preventDefault()
+        var target = e.target || e.srcElement
+        console.log(target)
+        self.changeLayout(target)
+      })
+      // el.addEventListener('touchstart', self.changeLayout)
+      // el.addEventListener('touchstart' || 'click', self.changeLayout)
     }
     // document.body.appendChild(button)
   }
@@ -250,14 +302,14 @@ export default class App {
           var pos1 = boxObject.positions[0]
           var offset = row - (this.grid.rows.length / 2)
           pos1 = {
-            x: 0,
-            y: col / 2,
+            x: col / 2,
+            y: 0,
             z: row - 1  / 2
           }
           var pos2 = boxObject.positions[1]
           pos2 = {
             x: 2,
-            y: col / 1,
+            y: col / 2,
             z: row / 1
           }
           self.collectFirst = false
@@ -307,17 +359,90 @@ export default class App {
 
   draw () {
     var self = this
-    this.raycaster.setFromCamera(this.mouse3D, self.camera)
-
-    const intersects = this.raycaster.intersectObjects([this.floor])
     // console.log('floor type of: ' + this.floor)
     // console.log('box 1 type of: ' + this.allCubes[0])
     // const intersects = this.raycaster.intersectObjects([this.allCubes[0]])
 
-    // Are there any intersections
+    // Decide which layout
+    if (self.layout[0]) {
+
+      // console.log('intersects: ' + x)
+      for (let row = 0; row < this.grid.rows; row++) {
+        for (let index = 0; index < 1; index++) {
+          const totalCols = this.getTotalRows(row)
+
+          for (let col = 0; col < totalCols; col++) {
+            const obj = new Object()
+            obj.mesh = this.meshes[row][col].mesh
+            obj.pos = this.meshes[row][col].positions
+
+            // Position tween happens here
+            // cons/t y = map(mouseDistance, 7, 0, 0, 6) // Org
+            // const y = map(mouseDistance, 4, 0, 0, 4)
+            // TweenMax.to(mesh.position, 0.3, { y: y < 1 ? 1 : y })
+            TweenMax.to(obj.mesh.position, 0.3, {
+              x: obj.pos[0].x,
+              y: obj.pos[0].y,
+              z: obj.pos[0].z
+            })
+            // Position tween happens here - end
+
+            // Rotation happens here
+            // TweenMax.to(mesh.rotation, 0.7, {
+            //   ease: Expo.easeOut,
+            //   x: map(
+            //     mesh.position.y,
+            //     -1,
+            //     1,
+            //     radians(270),
+            //     mesh.initialRotation.x
+            //   ),
+            //   z: map(
+            //     mesh.position.y,
+            //     -1,
+            //     1,
+            //     radians(-90),
+            //     mesh.initialRotation.z
+            //   ),
+            //   y: map(
+            //     mesh.position.y,
+            //     -1,
+            //     1,
+            //     radians(45),
+            //     mesh.initialRotation.y
+            //   )
+            // })
+            // Rotation happens here - end
+          }
+        }
+      }
+    }
+    // No intersections
+    else if (self.layout[1]) {
+      // console.log('nope')
+      for (let row = 0; row < this.grid.rows; row++) {
+        for (let index = 0; index < 1; index++) {
+          const totalCols = this.getTotalRows(row)
+          for (let col = 0; col < totalCols; col++) {
+            const obj = new Object()
+            obj.mesh = this.meshes[row][col].mesh
+            obj.pos = this.meshes[row][col].positions
+            TweenMax.to(obj.mesh.position, 0.3, {
+              x: obj.pos[1].x,
+              y: obj.pos[1].y,
+              z: obj.pos[1].z
+            })
+          }
+        }
+      }
+    }
+    
+    // Intersections
+    this.raycaster.setFromCamera(this.mouse3D, self.camera)
+    const intersects = this.raycaster.intersectObjects([this.floor])
+
     if (intersects.length) {
       const { x, z } = intersects[0].point
-
       // console.log('intersects: ' + x)
       for (let row = 0; row < this.grid.rows; row++) {
         for (let index = 0; index < 1; index++) {
@@ -334,19 +459,6 @@ export default class App {
               obj.mesh.position.x + this.groupMesh.position.x,
               obj.mesh.position.z + this.groupMesh.position.z
             )
-
-            // Position tween happens here
-            // cons/t y = map(mouseDistance, 7, 0, 0, 6) // Org
-            if (self.collectFirst) {
-              // self.allCubes.
-            }
-            // const y = map(mouseDistance, 4, 0, 0, 4)
-            // TweenMax.to(mesh.position, 0.3, { y: y < 1 ? 1 : y })
-            TweenMax.to(obj.mesh.position, 0.3, {
-              x: obj.pos[1].x,
-              y: obj.pos[1].y,
-              z: obj.pos[1].z
-            })
             // Position tween happens here - end
 
             // Scale happens here
@@ -390,25 +502,6 @@ export default class App {
             //   )
             // })
             // Rotation happens here - end
-          }
-        }
-      }
-    }
-    // No intersections
-    else {
-      // console.log('nope')
-      for (let row = 0; row < this.grid.rows; row++) {
-        for (let index = 0; index < 1; index++) {
-          const totalCols = this.getTotalRows(row)
-          for (let col = 0; col < totalCols; col++) {
-            const obj = new Object()
-            obj.mesh = this.meshes[row][col].mesh
-            obj.pos = this.meshes[row][col].positions
-            TweenMax.to(obj.mesh.position, 0.3, {
-              x: obj.pos[0].x,
-              y: obj.pos[0].y,
-              z: obj.pos[0].z
-            })
           }
         }
       }
