@@ -12,7 +12,8 @@ export default class App {
 
     this.gutter = { size: 4 } // Org 4
     this.meshes = []
-    this.grid = { rows: 20, cols: 20 }
+    // this.grid = { rows: 20, cols: 20 }
+    this.grid = { cols: 1, rows: 10 }
     this.width = window.innerWidth
     this.height = window.innerHeight
     this.mouse3D = new THREE.Vector2()
