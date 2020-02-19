@@ -12,8 +12,8 @@ export default class App {
 
     this.gutter = { size: 4 } // Org 4
     this.meshes = []
-    // this.grid = { rows: 20, cols: 20 }
-    this.grid = { cols: 1, rows: 10 }
+    this.grid = { rows: 20, cols: 20 }
+    // this.grid = { cols: 1, rows: 10 }
     this.width = window.innerWidth
     this.height = window.innerHeight
     this.mouse3D = new THREE.Vector2()
@@ -23,6 +23,7 @@ export default class App {
       // new Torus(),
       // new Cylinder(),
     ]
+    this.allCubes = []
 
     this.raycaster = new THREE.Raycaster()
   }
@@ -160,24 +161,34 @@ export default class App {
   }
 
   addFloor () {
-    const geometry = new THREE.PlaneGeometry(100, 100)
+    const geometry = new THREE.PlaneGeometry(10, 10) // org made floor smaller
     const material = new THREE.ShadowMaterial({ opacity: 0.3 })
+    // const material = new <THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false })
 
     this.floor = new THREE.Mesh(geometry, material)
-    this.floor.position.y = 0
-    this.floor.receiveShadow = true
+    this.floor.position.y = -1
+    this.floor.receiveShadow = true;
     this.floor.rotateX(-Math.PI / 2)
+
+    // var cylGeometry = new THREE.CylinderGeometry(1, 0, 3, 50, 50, false);
+    // var cylMaterial = new THREE.MeshLambertMaterial( { color: 0xffffff } );
+    // var cylinder = new THREE.Mesh( cylGeometry, cylMaterial );
+    // cylinder.position.set(-1,-2,1);
+    // // cylinder.rotation.x = -Math.PI / 2;
+    // cylinder.castShadow = true;
+    // this.scene.add( cylinder );
 
     this.scene.add(this.floor)
   }
 
-  getRandomGeometry () {
-    return this.geometries[
-      Math.floor(Math.random() * Math.floor(this.geometries.length))
-    ]
-  }
+  // getRandomGeometry () {
+  //   return this.geometries[
+  //     Math.floor(Math.random() * Math.floor(this.geometries.length))
+  //   ]
+  // }
 
   createGrid () {
+    var self = this
     this.groupMesh = new THREE.Object3D()
 
     const material = new THREE.MeshPhysicalMaterial({
@@ -195,8 +206,10 @@ export default class App {
         const totalCol = this.getTotalRows(row)
 
         for (let col = 0; col < totalCol; col++) {
-          const geometry = this.getRandomGeometry()
+          // const geometry = this.getRandomGeometry()
+          const geometry = this.geometries[0]
           const mesh = this.getMesh(geometry.geom, material)
+          self.allCubes.push(mesh)
 
           // mesh.position.y = 0
           // mesh.position.x = col + col * this.gutter.size + (totalCol === this.grid.cols ? 0 : 2.5)
@@ -252,13 +265,18 @@ export default class App {
   }
 
   draw () {
-    this.raycaster.setFromCamera(this.mouse3D, this.camera)
+    var self = this
+    this.raycaster.setFromCamera(this.mouse3D, self.camera)
 
     const intersects = this.raycaster.intersectObjects([this.floor])
+    // console.log('floor type of: ' + this.floor)
+    // console.log('box 1 type of: ' + this.allCubes[0])
+    // const intersects = this.raycaster.intersectObjects([this.allCubes[0]])
 
     if (intersects.length) {
       const { x, z } = intersects[0].point
-
+      
+      // console.log('intersects: ' + x)
       for (let row = 0; row < this.grid.rows; row++) {
         for (let index = 0; index < 1; index++) {
           const totalCols = this.getTotalRows(row)
@@ -272,20 +290,26 @@ export default class App {
               mesh.position.x + this.groupMesh.position.x,
               mesh.position.z + this.groupMesh.position.z
             )
-
+            
+            // Position tween happens here
             // const y = map(mouseDistance, 7, 0, 0, 6) // Org
-            const y = map(mouseDistance, 4, 0, 0, 4)
-            TweenMax.to(mesh.position, 0.3, { y: y < 1 ? 1 : y })
-
+            // const y = map(mouseDistance, 4, 0, 0, 4)
+            // TweenMax.to(mesh.position, 0.3, { y: y < 1 ? 1 : y })
+            // Position tween happens here - end
+            
             // Scale happens here
             // const scaleFactor = mesh.position.y / 1.2
             // const scale = scaleFactor < 1 ? 1 : scaleFactor
-            // TweenMax.to(mesh.scale, 0.3, {
-            //   ease: Expo.easeOut,
-            //   x: scale,
-            //   y: scale,
-            //   z: scale
-            // })
+            const scaleVal = map(mouseDistance, 4, 0, 1, 2)
+            console.log(mouseDistance)
+            // const scale = (1 / y) * 0.1
+            const scale = scaleVal
+            TweenMax.to(mesh.scale, 0.3, {
+              ease: Expo.easeOut,
+              x: scale,
+              y: scale,
+              z: scale
+            })
             // Scale happens here - end
 
             // Rotation happens here
