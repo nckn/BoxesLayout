@@ -14,7 +14,11 @@ export default class App {
     this.gutter = { size: 4 } // Org 4
     this.meshes = []
     // this.grid = { rows: 20, cols: 20 }
-    this.grid = { cols: 8, rows: 1 }
+    this.grid = { 
+      cols: 9,
+      rows: 1,
+      depth: 1
+    }
     this.width = window.innerWidth
     this.height = window.innerHeight
     this.mouse3D = new THREE.Vector2()
@@ -167,22 +171,27 @@ export default class App {
   }
 
   addAmbientLight () {
-    const obj = { color1: '#eed4aa', color2: '#fb985c' }
+    const obj = { color1: '#eed4aa', color2: '#6f78c9' }
     const ambLight = new THREE.AmbientLight(obj.color1, 1)
     const ambLight2 = new THREE.AmbientLight(obj.color2, 1)
     // const light = new THREE.AmbientLight('#ffffff', 1)
     this.scene.add(ambLight)
     this.scene.add(ambLight2)
 
+    // Make gui
     const gui = this.gui.addFolder('Ambient Light 1')
-
     gui.addColor(obj, 'color1').onChange(color => {
       ambLight.color = hexToRgbTreeJs(color)
+    })
+    const gui2 = this.gui.addFolder('Ambient Light 2')
+    gui2.addColor(obj, 'color2').onChange(color => {
+      ambLight2.color = hexToRgbTreeJs(color)
     })
   }
 
   addSpotLight () {
     // Spot light
+    const obj = { color: '#ffffff' }
     // const spLight = new THREE.SpotLight('#7bccd7', 1, 1000)
 
     // spLight.position.set(0, 27, 0)
@@ -193,19 +202,25 @@ export default class App {
     // Point light
     var light = new THREE.PointLight(0xff0000, 1, 1000)
     light.position.set(0, 10, 0)
-    this.scene.add(light)
+    // this.scene.add(light)
+
+    const gui = this.gui.addFolder('Spot light')
+
+    gui.addColor(obj, 'color').onChange(color => {
+      light.color = hexToRgbTreeJs(color)
+    })
   }
 
   addOtherLight () {
     // Hemispheric light
     var hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6)
-    hemiLight.color.setHSL(0.6, 1, 0.6)
+    // hemiLight.color.setHSL(0.6, 1, 0.6)
     hemiLight.groundColor.setHSL(0.095, 1, 0.75)
     hemiLight.position.set(0, 50, 0)
     this.scene.add(hemiLight)
 
     var dirLight = new THREE.DirectionalLight(0xffffff, 1)
-    dirLight.color.setHSL(0.1, 1, 0.95)
+    // dirLight.color.setHSL(0.1, 1, 0.95)
     dirLight.position.set(-1, 1.75, 1)
     dirLight.position.multiplyScalar(30)
     this.scene.add(dirLight)
@@ -464,6 +479,7 @@ export default class App {
             // Scale happens here
             // const scaleFactor = mesh.position.y / 1.2
             // const scale = scaleFactor < 1 ? 1 : scaleFactor
+            return
             const scaleVal = map(mouseDistance, 4, 0, 1, 2)
             // console.log(mouseDistance)
             // const scale = (1 / y) * 0.1
@@ -558,7 +574,7 @@ export default class App {
 
     this.onMouseMove({ clientX: 0, clientY: 0 })
     // Draw guides
-    this.drawGuides()
+    // this.drawGuides()
     // Apply buttons
     this.setupButtons()
   }
