@@ -7,9 +7,17 @@ import Box from '../../../second-demo/src/scripts/elements/box'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import Button from './elements/button'
 
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
+import BlurPass from './Passes/Blur.js'
+
 export default class App {
   setup () {
     this.backgroundColor = '#050505'
+
+    // Set up
+    // this.time = new Time()
 
     this.gutter = { size: 4 } // Org 4
     this.meshes = []
@@ -577,6 +585,8 @@ export default class App {
     // this.drawGuides()
     // Apply buttons
     this.setupButtons()
+
+    this.setPasses()
   }
 
   onMouseMove ({ clientX, clientY }) {
@@ -602,4 +612,94 @@ export default class App {
 
     requestAnimationFrame(this.animate.bind(this))
   }
+
+  setPasses()
+    {
+        this.passes = {}
+
+        // Debug
+        if(this.debug)
+        {
+            this.passes.debugFolder = this.debug.addFolder('postprocess')
+            // this.passes.debugFolder.open()
+        }
+
+        this.passes.composer = new EffectComposer(this.renderer)
+
+        // Create passes
+        this.passes.renderPass = new RenderPass(this.scene, this.camera.instance)
+
+        this.passes.horizontalBlurPass = new ShaderPass(BlurPass)
+        this.passes.horizontalBlurPass.strength = this.config.touch ? 0 : 1
+        this.passes.horizontalBlurPass.material.uniforms.uResolution.value = new THREE.Vector2(this.sizes.viewport.width, this.sizes.viewport.height)
+        this.passes.horizontalBlurPass.material.uniforms.uStrength.value = new THREE.Vector2(this.passes.horizontalBlurPass.strength, 0)
+
+        this.passes.verticalBlurPass = new ShaderPass(BlurPass)
+        this.passes.verticalBlurPass.strength = this.config.touch ? 0 : 1
+        this.passes.verticalBlurPass.material.uniforms.uResolution.value = new THREE.Vector2(this.sizes.viewport.width, this.sizes.viewport.height)
+        this.passes.verticalBlurPass.material.uniforms.uStrength.value = new THREE.Vector2(0, this.passes.verticalBlurPass.strength)
+
+        // Debug
+        if(this.debug)
+        {
+            const folder = this.passes.debugFolder.addFolder('blur')
+            folder.open()
+
+            folder.add(this.passes.horizontalBlurPass.material.uniforms.uStrength.value, 'x').step(0.001).min(0).max(10)
+            folder.add(this.passes.verticalBlurPass.material.uniforms.uStrength.value, 'y').step(0.001).min(0).max(10)
+        }
+
+        this.passes.glowsPass = new ShaderPass(GlowsPass)
+        this.passes.glowsPass.color = '#ffcfe0'
+        this.passes.glowsPass.material.uniforms.uPosition.value = new THREE.Vector2(0, 0.25)
+        this.passes.glowsPass.material.uniforms.uRadius.value = 0.7
+        this.passes.glowsPass.material.uniforms.uColor.value = new THREE.Color(this.passes.glowsPass.color)
+        // this.passes.glowsPass.material.uniforms.uAlpha.value = 0.55 // Org value: 0.55 
+        this.passes.glowsPass.material.uniforms.uAlpha.value = 0.0
+
+        // Debug
+        if(this.debug)
+        {
+            const folder = this.passes.debugFolder.addFolder('glows')
+            folder.open()
+
+            folder.add(this.passes.glowsPass.material.uniforms.uPosition.value, 'x').step(0.001).min(- 1).max(2).name('positionX')
+            folder.add(this.passes.glowsPass.material.uniforms.uPosition.value, 'y').step(0.001).min(- 1).max(2).name('positionY')
+            folder.add(this.passes.glowsPass.material.uniforms.uRadius, 'value').step(0.001).min(0).max(2).name('radius')
+            folder.addColor(this.passes.glowsPass, 'color').name('color').onChange(() =>
+            {
+                this.passes.glowsPass.material.uniforms.uColor.value = new THREE.Color(this.passes.glowsPass.color)
+            })
+            folder.add(this.passes.glowsPass.material.uniforms.uAlpha, 'value').step(0.001).min(0).max(1).name('alpha')
+        }
+
+        // Add passes
+        this.passes.composer.addPass(this.passes.renderPass)
+        this.passes.composer.addPass(this.passes.horizontalBlurPass)
+        this.passes.composer.addPass(this.passes.verticalBlurPass)
+        this.passes.composer.addPass(this.passes.glowsPass)
+
+        // Time tick
+        this.time.on('tick', () =>
+        {
+            this.passes.horizontalBlurPass.enabled = this.passes.horizontalBlurPass.material.uniforms.uStrength.value.x > 0
+            this.passes.verticalBlurPass.enabled = this.passes.verticalBlurPass.material.uniforms.uStrength.value.y > 0
+
+            // Renderer
+            this.passes.composer.render()
+            // this.renderer.domElement.style.background = 'black'
+            // this.renderer.render(this.scene, this.camera.instance)
+        })
+
+        // Resize event
+        this.sizes.on('resize', () =>
+        {
+            this.renderer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
+            this.passes.composer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
+            this.passes.horizontalBlurPass.material.uniforms.uResolution.value.x = this.sizes.viewport.width
+            this.passes.horizontalBlurPass.material.uniforms.uResolution.value.y = this.sizes.viewport.height
+            this.passes.verticalBlurPass.material.uniforms.uResolution.value.x = this.sizes.viewport.width
+            this.passes.verticalBlurPass.material.uniforms.uResolution.value.y = this.sizes.viewport.height
+        })
+    }
 }
