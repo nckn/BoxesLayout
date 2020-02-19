@@ -14,7 +14,8 @@ export default class Box {
     // ]
   }
   
-  putPositions (text) {
-    alert(text)
-  }
+  // putPositions (text) {
+  //   alert(text)
+  // }
+  
 }

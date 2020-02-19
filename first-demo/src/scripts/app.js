@@ -13,7 +13,7 @@ export default class App {
     this.gutter = { size: 4 } // Org 4
     this.meshes = []
     // this.grid = { rows: 20, cols: 20 }
-    this.grid = { cols: 1, rows: 10 }
+    this.grid = { cols: 5, rows: 1 }
     this.width = window.innerWidth
     this.height = window.innerHeight
     this.mouse3D = new THREE.Vector2()
@@ -29,6 +29,12 @@ export default class App {
     this.positions = []
 
     this.raycaster = new THREE.Raycaster()
+
+  }
+  
+  drawGuides() {
+    var axesHelper = new THREE.AxesHelper( 5 );
+    this.scene.add( axesHelper )
   }
 
   createScene () {
@@ -169,7 +175,7 @@ export default class App {
     // const material = new <THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false })
 
     this.floor = new THREE.Mesh(geometry, material)
-    this.floor.position.y = -1
+    this.floor.position.y = 0
     this.floor.receiveShadow = true
     this.floor.rotateX(-Math.PI / 2)
 
@@ -223,10 +229,11 @@ export default class App {
           self.allCubes.push(boxObject)
 
           var pos1 = boxObject.positions[0]
+          var offset = row - (this.grid.rows.length / 2)
           pos1 = {
             x: 0,
             y: col / 2,
-            z: row / 2
+            z: row - 1  / 2
           }
           var pos2 = boxObject.positions[1]
           pos2 = {
@@ -274,7 +281,7 @@ export default class App {
     const centerX = -this.grid.cols / 4
     const centerZ = -this.grid.rows / 4
 
-    this.groupMesh.position.set(centerX, -0.75, centerZ)
+    this.groupMesh.position.set(centerX, 0, centerZ)
 
     this.scene.add(this.groupMesh)
   }
@@ -288,6 +295,7 @@ export default class App {
     // console.log('box 1 type of: ' + this.allCubes[0])
     // const intersects = this.raycaster.intersectObjects([this.allCubes[0]])
 
+    // Are there any intersections
     if (intersects.length) {
       const { x, z } = intersects[0].point
 
@@ -297,13 +305,15 @@ export default class App {
           const totalCols = this.getTotalRows(row)
 
           for (let col = 0; col < totalCols; col++) {
-            const mesh = this.meshes[row][col].mesh
+            const obj = new Object()
+            obj.mesh = this.meshes[row][col].mesh
+            obj.pos = this.meshes[row][col].positions
 
             const mouseDistance = distance(
               x,
               z,
-              mesh.position.x + this.groupMesh.position.x,
-              mesh.position.z + this.groupMesh.position.z
+              obj.mesh.position.x + this.groupMesh.position.x,
+              obj.mesh.position.z + this.groupMesh.position.z
             )
 
             // Position tween happens here
@@ -313,7 +323,11 @@ export default class App {
             }
             // const y = map(mouseDistance, 4, 0, 0, 4)
             // TweenMax.to(mesh.position, 0.3, { y: y < 1 ? 1 : y })
-            // TweenMax.to(mesh.position, 0.3, { z: 10 })
+            TweenMax.to(obj.mesh.position, 0.3, {
+              x: obj.pos[1].x,
+              y: obj.pos[1].y,
+              z: obj.pos[1].z
+            })
             // Position tween happens here - end
 
             // Scale happens here
@@ -323,7 +337,7 @@ export default class App {
             console.log(mouseDistance)
             // const scale = (1 / y) * 0.1
             const scale = scaleVal
-            TweenMax.to(mesh.scale, 0.3, {
+            TweenMax.to(obj.mesh.scale, 0.3, {
               ease: Expo.easeOut,
               x: scale,
               y: scale,
@@ -357,6 +371,25 @@ export default class App {
             //   )
             // })
             // Rotation happens here - end
+          }
+        }
+      }
+    }
+    // No intersections
+    else {
+      console.log('nope')
+      for (let row = 0; row < this.grid.rows; row++) {
+        for (let index = 0; index < 1; index++) {
+          const totalCols = this.getTotalRows(row)
+          for (let col = 0; col < totalCols; col++) {
+            const obj = new Object()
+            obj.mesh = this.meshes[row][col].mesh
+            obj.pos = this.meshes[row][col].positions
+            TweenMax.to(obj.mesh.position, 0.3, {
+              x: obj.pos[0].x,
+              y: obj.pos[0].y,
+              z: obj.pos[0].z
+            })
           }
         }
       }
@@ -412,6 +445,8 @@ export default class App {
     window.addEventListener('mousemove', this.onMouseMove.bind(this), false)
 
     this.onMouseMove({ clientX: 0, clientY: 0 })
+    // Draw guides
+    this.drawGuides()
   }
 
   onMouseMove ({ clientX, clientY }) {
