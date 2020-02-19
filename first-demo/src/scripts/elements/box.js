@@ -7,5 +7,14 @@ export default class Box {
     this.rotationX = 0;
     this.rotationY = 0;
     this.rotationZ = 0;
+    this.positions = []
+    // this.positions = [
+    //   pos1: {x: 0, y: 0, z: 0},
+    //   pos2: {x: 0, y: 0, z: 0}
+    // ]
+  }
+  
+  putPositions (text) {
+    alert(text)
   }
 }

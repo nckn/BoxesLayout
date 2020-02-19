@@ -8,12 +8,12 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 export default class App {
   setup () {
-    this.backgroundColor = '#191919'
+    this.backgroundColor = '#050505'
 
     this.gutter = { size: 4 } // Org 4
     this.meshes = []
-    this.grid = { rows: 20, cols: 20 }
-    // this.grid = { cols: 1, rows: 10 }
+    // this.grid = { rows: 20, cols: 20 }
+    this.grid = { cols: 1, rows: 10 }
     this.width = window.innerWidth
     this.height = window.innerHeight
     this.mouse3D = new THREE.Vector2()
@@ -24,6 +24,9 @@ export default class App {
       // new Cylinder(),
     ]
     this.allCubes = []
+    this.collectFirst = true
+
+    this.positions = []
 
     this.raycaster = new THREE.Raycaster()
   }
@@ -31,7 +34,7 @@ export default class App {
   createScene () {
     this.scene = new THREE.Scene()
 
-    this.scene.background = new THREE.Color(0x000000) // Black background
+    // this.scene.background = new THREE.Color(0x000000) // Black background
     this.scene.fog = new THREE.Fog(0x000000, 20, 60)
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
@@ -167,7 +170,7 @@ export default class App {
 
     this.floor = new THREE.Mesh(geometry, material)
     this.floor.position.y = -1
-    this.floor.receiveShadow = true;
+    this.floor.receiveShadow = true
     this.floor.rotateX(-Math.PI / 2)
 
     // var cylGeometry = new THREE.CylinderGeometry(1, 0, 3, 50, 50, false);
@@ -207,17 +210,42 @@ export default class App {
 
         for (let col = 0; col < totalCol; col++) {
           // const geometry = this.getRandomGeometry()
-          const geometry = this.geometries[0]
+          // const geometry = this.geometries[0]
+          const geometry = new Box()
           const mesh = this.getMesh(geometry.geom, material)
-          self.allCubes.push(mesh)
+          // console.log('mesh: ' + geometry.size)
+          var boxObject = new Object()
+          boxObject = {
+            mesh: mesh,
+            geometry: geometry,
+            positions: []
+          }
+          self.allCubes.push(boxObject)
+
+          var pos1 = boxObject.positions[0]
+          pos1 = {
+            x: 0,
+            y: col / 2,
+            z: row / 2
+          }
+          var pos2 = boxObject.positions[1]
+          pos2 = {
+            x: 2,
+            y: col / 1,
+            z: row / 1
+          }
+          self.collectFirst = false
+          // console.log('mesh: ' + JSON.stringify(mesh))
 
           // mesh.position.y = 0
           // mesh.position.x = col + col * this.gutter.size + (totalCol === this.grid.cols ? 0 : 2.5)
           // mesh.position.z = row + row * (index + 0.25)
 
-          mesh.position.y = 0
-          mesh.position.x = col / 2
-          mesh.position.z = row / 2
+          // this.positions
+
+          mesh.position.y = pos1.x
+          mesh.position.x = pos1.y
+          mesh.position.z = pos1.z
 
           // mesh.rotation.x = geometry.rotationX
           // mesh.rotation.y = geometry.rotationY
@@ -235,7 +263,7 @@ export default class App {
 
           this.groupMesh.add(mesh)
 
-          this.meshes[row][col] = mesh
+          this.meshes[row][col] = {mesh: mesh, positions: [pos1, pos2]}
         }
       }
     }
@@ -251,19 +279,6 @@ export default class App {
     this.scene.add(this.groupMesh)
   }
 
-  getTotalRows (col) {
-    return col % 2 === 0 ? this.grid.cols : this.grid.cols - 1
-  }
-
-  getMesh (geometry, material) {
-    const mesh = new THREE.Mesh(geometry, material)
-
-    mesh.castShadow = true
-    mesh.receiveShadow = true
-
-    return mesh
-  }
-
   draw () {
     var self = this
     this.raycaster.setFromCamera(this.mouse3D, self.camera)
@@ -275,14 +290,14 @@ export default class App {
 
     if (intersects.length) {
       const { x, z } = intersects[0].point
-      
+
       // console.log('intersects: ' + x)
       for (let row = 0; row < this.grid.rows; row++) {
         for (let index = 0; index < 1; index++) {
           const totalCols = this.getTotalRows(row)
 
           for (let col = 0; col < totalCols; col++) {
-            const mesh = this.meshes[row][col]
+            const mesh = this.meshes[row][col].mesh
 
             const mouseDistance = distance(
               x,
@@ -290,13 +305,17 @@ export default class App {
               mesh.position.x + this.groupMesh.position.x,
               mesh.position.z + this.groupMesh.position.z
             )
-            
+
             // Position tween happens here
-            // const y = map(mouseDistance, 7, 0, 0, 6) // Org
+            // cons/t y = map(mouseDistance, 7, 0, 0, 6) // Org
+            if (self.collectFirst) {
+              // self.allCubes.
+            }
             // const y = map(mouseDistance, 4, 0, 0, 4)
             // TweenMax.to(mesh.position, 0.3, { y: y < 1 ? 1 : y })
+            // TweenMax.to(mesh.position, 0.3, { z: 10 })
             // Position tween happens here - end
-            
+
             // Scale happens here
             // const scaleFactor = mesh.position.y / 1.2
             // const scale = scaleFactor < 1 ? 1 : scaleFactor
@@ -342,6 +361,19 @@ export default class App {
         }
       }
     }
+  }
+
+  getTotalRows (col) {
+    return col % 2 === 0 ? this.grid.cols : this.grid.cols - 1
+  }
+
+  getMesh (geometry, material) {
+    const mesh = new THREE.Mesh(geometry, material)
+
+    mesh.castShadow = true
+    mesh.receiveShadow = true
+
+    return mesh
   }
 
   init () {
