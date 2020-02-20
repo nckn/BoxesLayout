@@ -12,7 +12,18 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import BlurPass from './Passes/Blur.js'
 
+// Utils
+import Sizes from './Utils/Sizes.js'
+
 export default class App {
+
+  constructor() {
+    // Set up
+    // this.time = new Time()
+    this.sizes = new Sizes()
+    // this.resources = new Resources()
+  }
+
   setup () {
     this.backgroundColor = '#050505'
 
@@ -22,7 +33,7 @@ export default class App {
     this.gutter = { size: 4 } // Org 4
     this.meshes = []
     // this.grid = { rows: 20, cols: 20 }
-    this.grid = { 
+    this.grid = {
       cols: 9,
       rows: 1,
       depth: 1
@@ -44,15 +55,52 @@ export default class App {
     this.raycaster = new THREE.Raycaster()
 
     this.buttons = [
-      {name: 'horizontal', color: 'green', pos: {x: 20, y: 20}, img: 'icon-center-horizontally.svg'},
-      {name: 'vertical', color: 'red', pos: {x: 20, y: 60}, img: 'icon-center-vertically.svg'}
+      {
+        name: 'horizontal',
+        color: 'green',
+        pos: { x: 20, y: 20 },
+        img: 'icon-center-horizontally.svg'
+      },
+      {
+        name: 'vertical',
+        color: 'red',
+        pos: { x: 20, y: 60 },
+        img: 'icon-center-vertically.svg'
+      }
     ]
 
     this.layout = [true, false]
 
   }
-  
-  changeLayout (target) { 
+
+  setConfig () {
+    this.config = {}
+    this.config.debug = window.location.hash === '#debug'
+    this.config.cyberTruck = window.location.hash === '#cybertruck'
+    this.config.touch = false
+
+    window.addEventListener(
+      'touchstart',
+      () => {
+        this.config.touch = true
+        // this.world.controls.setTouch()
+
+        this.passes.horizontalBlurPass.strength = 1
+        this.passes.horizontalBlurPass.material.uniforms.uStrength.value = new THREE.Vector2(
+          this.passes.horizontalBlurPass.strength,
+          0
+        )
+        this.passes.verticalBlurPass.strength = 1
+        this.passes.verticalBlurPass.material.uniforms.uStrength.value = new THREE.Vector2(
+          0,
+          this.passes.verticalBlurPass.strength
+        )
+      },
+      { once: true }
+    )
+  }
+
+  changeLayout (target) {
     console.log(target.name)
     var name = target.getAttribute('name')
     switch (name) {
@@ -60,12 +108,12 @@ export default class App {
         console.log('line')
         this.layout[1] = false
         this.layout[0] = true
-        break;
+        break
       case 'vertical':
         console.log('grid')
         this.layout[0] = false
         this.layout[1] = true
-        break;
+        break
       default:
     }
     // for (let row = 0; row < this.grid.rows; row++) {
@@ -90,20 +138,20 @@ export default class App {
   //   evt.preventDefault()
   //   this.changeLayout()
   // }
-  
+
   setupButtons () {
     var self = this
-    var bA = this.buttons; // Button array
+    var bA = this.buttons // Button array
     for (var i = 0; i < bA.length; i++) {
       var button = new Button({
         name: bA[i].name,
         color: bA[i].color,
         pos: bA[i].pos,
         img: bA[i].img
-      });
-      this.buttons.domElem = button;
-      var el = this.buttons.domElem.button;
-      el.addEventListener('click', (e) => {
+      })
+      this.buttons.domElem = button
+      var el = this.buttons.domElem.button
+      el.addEventListener('click', e => {
         e.preventDefault()
         var target = e.target || e.srcElement
         console.log(target)
@@ -115,9 +163,9 @@ export default class App {
     // document.body.appendChild(button)
   }
 
-  drawGuides() {
-    var axesHelper = new THREE.AxesHelper( 5 );
-    this.scene.add( axesHelper )
+  drawGuides () {
+    var axesHelper = new THREE.AxesHelper(5)
+    this.scene.add(axesHelper)
   }
 
   createScene () {
@@ -127,6 +175,7 @@ export default class App {
     this.scene.fog = new THREE.Fog(0x000000, 20, 60)
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    this.renderer.setPixelRatio(2)
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     this.renderer.setPixelRatio(window.devicePixelRatio)
 
@@ -323,11 +372,11 @@ export default class App {
           self.allCubes.push(boxObject)
 
           var pos1 = boxObject.positions[0]
-          var offset = row - (this.grid.rows.length / 2)
+          var offset = row - this.grid.rows.length / 2
           pos1 = {
             x: col / 2,
             y: 0,
-            z: row - 1  / 2
+            z: row - 1 / 2
           }
           var pos2 = boxObject.positions[1]
           pos2 = {
@@ -364,7 +413,7 @@ export default class App {
 
           this.groupMesh.add(mesh)
 
-          this.meshes[row][col] = {mesh: mesh, positions: [pos1, pos2]}
+          this.meshes[row][col] = { mesh: mesh, positions: [pos1, pos2] }
         }
       }
     }
@@ -388,7 +437,6 @@ export default class App {
 
     // Decide which layout
     if (self.layout[0]) {
-
       // console.log('intersects: ' + x)
       for (let row = 0; row < this.grid.rows; row++) {
         for (let index = 0; index < 1; index++) {
@@ -459,7 +507,7 @@ export default class App {
         }
       }
     }
-    
+
     // Intersections
     this.raycaster.setFromCamera(this.mouse3D, self.camera)
     const intersects = this.raycaster.intersectObjects([this.floor])
@@ -550,6 +598,8 @@ export default class App {
 
     this.createScene()
 
+    this.setConfig()
+
     this.addControls()
 
     this.createCamera()
@@ -624,6 +674,9 @@ export default class App {
             // this.passes.debugFolder.open()
         }
 
+        // console.log('logging renderer: ' + JSON.stringify(this.renderer))
+        console.log('logging renderer: ' + this.renderer.width)
+
         this.passes.composer = new EffectComposer(this.renderer)
 
         // Create passes
@@ -649,13 +702,13 @@ export default class App {
             folder.add(this.passes.verticalBlurPass.material.uniforms.uStrength.value, 'y').step(0.001).min(0).max(10)
         }
 
-        this.passes.glowsPass = new ShaderPass(GlowsPass)
-        this.passes.glowsPass.color = '#ffcfe0'
-        this.passes.glowsPass.material.uniforms.uPosition.value = new THREE.Vector2(0, 0.25)
-        this.passes.glowsPass.material.uniforms.uRadius.value = 0.7
-        this.passes.glowsPass.material.uniforms.uColor.value = new THREE.Color(this.passes.glowsPass.color)
-        // this.passes.glowsPass.material.uniforms.uAlpha.value = 0.55 // Org value: 0.55 
-        this.passes.glowsPass.material.uniforms.uAlpha.value = 0.0
+        // this.passes.glowsPass = new ShaderPass(GlowsPass)
+        // this.passes.glowsPass.color = '#ffcfe0'
+        // this.passes.glowsPass.material.uniforms.uPosition.value = new THREE.Vector2(0, 0.25)
+        // this.passes.glowsPass.material.uniforms.uRadius.value = 0.7
+        // this.passes.glowsPass.material.uniforms.uColor.value = new THREE.Color(this.passes.glowsPass.color)
+        // // this.passes.glowsPass.material.uniforms.uAlpha.value = 0.55 // Org value: 0.55 
+        // this.passes.glowsPass.material.uniforms.uAlpha.value = 0.0
 
         // Debug
         if(this.debug)

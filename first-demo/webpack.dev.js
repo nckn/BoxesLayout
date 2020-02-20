@@ -25,7 +25,7 @@ module.exports = merge(common, {
   },
   resolve: {
     alias: {
-      Scripts: path.resolve(__dirname, './src/scripts/'),
+      Scripts: path.resolve(__dirname, './src/scripts/')
     }
   },
   plugins: [new webpack.HotModuleReplacementPlugin()]
