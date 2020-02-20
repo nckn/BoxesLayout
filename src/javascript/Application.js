@@ -52,7 +52,7 @@ export default class Application {
 
     this.positions = []
 
-    // this.raycaster = new THREE.Raycaster()
+    this.raycaster = new THREE.Raycaster()
     this.buttons = [
       {
         name: 'horizontal',
@@ -439,10 +439,6 @@ export default class Application {
 
   draw () {
     var self = this
-    // console.log('floor type of: ' + this.floor)
-    // console.log('box 1 type of: ' + this.allCubes[0])
-    // const intersects = this.raycaster.intersectObjects([this.allCubes[0]])
-
     // Decide which layout
     if (self.layout[0]) {
       // console.log('intersects: ' + x)
@@ -517,8 +513,8 @@ export default class Application {
     }
 
     // Intersections
-    // this.raycaster.setFromCamera(this.mouse3D, self.camera)
-    // const intersects = this.raycaster.intersectObjects([this.floor])
+    // this.raycaster.setFromCamera(this.mouse3D, self.camera.instance)
+    // const intersects = this.raycaster.intersectObjects([this.allCubes[0]])
 
     // if (intersects.length) {
     //   const { x, z } = intersects[0].point
