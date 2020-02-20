@@ -62,8 +62,8 @@ export default class
         this.setPhysics()
         this.setZones()
         this.setObjects()
-        this.setCar()
-        this.areas.car = this.car
+        // this.setRobot()
+        // this.areas.car = this.car
         this.setTiles()
         this.setBuildings()
         this.setWalls()
@@ -92,8 +92,8 @@ export default class
             }
 
             // Car
-            this.physics.car.chassis.body.sleep()
-            this.physics.car.chassis.body.position.set(0, 0, 12)
+            // this.physics.car.chassis.body.sleep()
+            // this.physics.car.chassis.body.position.set(0, 0, 12)
 
             window.setTimeout(() =>
             {
@@ -392,7 +392,7 @@ export default class
         // })
     }
 
-    setCar()
+    setRobot()
     {
         this.car = new Car({
             time: this.time,

@@ -229,7 +229,7 @@ export default class Application {
           pos1 = {
             x: col / 2,
             y: 0,
-            z: 1
+            z: 0.5
           }
           var pos2 = boxObject.positions[1]
           pos2 = {

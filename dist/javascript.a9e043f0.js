@@ -59682,8 +59682,8 @@ function (_EventEmitter) {
 
     _this.config = _options.config;
     _this.renderer = _options.renderer;
-    _this.resources = _options.resources;
-    _this.car = _options.car;
+    _this.resources = _options.resources; // this.car = _options.car
+
     _this.sounds = _options.sounds;
     _this.time = _options.time;
     _this.position = _options.position;
@@ -60008,18 +60008,21 @@ function (_EventEmitter) {
       this.mouseMesh.matrixAutoUpdate = false;
       this.mouseMesh.updateMatrix();
       this.container.add(this.mouseMesh);
-      this.time.on('tick', function () {
-        if (_this4.testCar) {
-          var isIn = Math.abs(_this4.car.position.x - _this4.position.x) < Math.abs(_this4.halfExtents.x) && Math.abs(_this4.car.position.y - _this4.position.y) < Math.abs(_this4.halfExtents.y);
-
-          if (isIn !== _this4.isIn) {
-            if (isIn) {
-              _this4.in(!_this4.config.touch);
-            } else {
-              _this4.out();
-            }
-          }
-        }
+      this.time.on('tick', function () {// if(this.testCar)
+        // {
+        //     const isIn = Math.abs(this.car.position.x - this.position.x) < Math.abs(this.halfExtents.x) && Math.abs(this.car.position.y - this.position.y) < Math.abs(this.halfExtents.y)
+        //     if(isIn !== this.isIn)
+        //     {
+        //         if(isIn)
+        //         {
+        //             this.in(!this.config.touch)
+        //         }
+        //         else
+        //         {
+        //             this.out()
+        //         }
+        //     }
+        // }
       });
       window.addEventListener('keydown', function (_event) {
         if ((_event.key === 'f' || _event.key === 'e' || _event.key === 'Enter') && _this4.isIn) {
@@ -67170,9 +67173,9 @@ function () {
       this.setShadows();
       this.setPhysics();
       this.setZones();
-      this.setObjects();
-      this.setCar();
-      this.areas.car = this.car;
+      this.setObjects(); // this.setRobot()
+      // this.areas.car = this.car
+
       this.setTiles();
       this.setBuildings();
       this.setWalls();
@@ -67226,11 +67229,9 @@ function () {
             delay: 0.75
           });
         } // Car
+        // this.physics.car.chassis.body.sleep()
+        // this.physics.car.chassis.body.position.set(0, 0, 12)
 
-
-        _this.physics.car.chassis.body.sleep();
-
-        _this.physics.car.chassis.body.position.set(0, 0, 12);
 
         window.setTimeout(function () {
           _this.physics.car.chassis.body.wakeUp();
@@ -67543,8 +67544,8 @@ function () {
       // })
     }
   }, {
-    key: "setCar",
-    value: function setCar() {
+    key: "setRobot",
+    value: function setRobot() {
       this.car = new _Car.default({
         time: this.time,
         resources: this.resources,
@@ -85681,7 +85682,7 @@ function () {
             pos1 = {
               x: col / 2,
               y: 0,
-              z: 1
+              z: 0.5
             };
             var pos2 = boxObject.positions[1];
             pos2 = {

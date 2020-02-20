@@ -18,7 +18,7 @@ export default class Area extends EventEmitter
         this.config = _options.config
         this.renderer = _options.renderer
         this.resources = _options.resources
-        this.car = _options.car
+        // this.car = _options.car
         this.sounds = _options.sounds
         this.time = _options.time
         this.position = _options.position
@@ -280,22 +280,22 @@ export default class Area extends EventEmitter
 
         this.time.on('tick', () =>
         {
-            if(this.testCar)
-            {
-                const isIn = Math.abs(this.car.position.x - this.position.x) < Math.abs(this.halfExtents.x) && Math.abs(this.car.position.y - this.position.y) < Math.abs(this.halfExtents.y)
+            // if(this.testCar)
+            // {
+            //     const isIn = Math.abs(this.car.position.x - this.position.x) < Math.abs(this.halfExtents.x) && Math.abs(this.car.position.y - this.position.y) < Math.abs(this.halfExtents.y)
 
-                if(isIn !== this.isIn)
-                {
-                    if(isIn)
-                    {
-                        this.in(!this.config.touch)
-                    }
-                    else
-                    {
-                        this.out()
-                    }
-                }
-            }
+            //     if(isIn !== this.isIn)
+            //     {
+            //         if(isIn)
+            //         {
+            //             this.in(!this.config.touch)
+            //         }
+            //         else
+            //         {
+            //             this.out()
+            //         }
+            //     }
+            // }
         })
 
         window.addEventListener('keydown', (_event) =>
