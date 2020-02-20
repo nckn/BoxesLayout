@@ -7,13 +7,14 @@ import Box from '../../../second-demo/src/scripts/elements/box'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import Button from './elements/button'
 
+// Utils
+import Sizes from './Utils/Sizes.js'
+
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import BlurPass from './Passes/Blur.js'
 
-// Utils
-import Sizes from './Utils/Sizes.js'
 
 export default class App {
 
@@ -22,6 +23,25 @@ export default class App {
     // this.time = new Time()
     this.sizes = new Sizes()
     // this.resources = new Resources()
+
+    this.setup()
+    this.createScene()
+    this.setConfig()
+    this.createCamera()
+    this.setPasses()
+    this.addControls()
+    this.createControls()
+    this.createGrid()
+    this.addFloor()
+    this.addAmbientLight()
+    this.animate()
+    window.addEventListener('resize', this.onResize.bind(this))
+    window.addEventListener('mousemove', this.onMouseMove.bind(this), false)
+    this.onMouseMove({ clientX: 0, clientY: 0 })
+    // Draw guides
+    // this.drawGuides()
+    // Apply buttons
+    this.setupButtons()
   }
 
   setup () {
@@ -169,20 +189,37 @@ export default class App {
   }
 
   createScene () {
+    // Scene
     this.scene = new THREE.Scene()
 
     // this.scene.background = new THREE.Color(0x000000) // Black background
     this.scene.fog = new THREE.Fog(0x000000, 20, 60)
 
+    // Renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    // this.renderer.setClearColor(0x414141, 1)
+    this.renderer.setClearColor(0x000000, 1)
+    // this.renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio, 1.5), 2))
     this.renderer.setPixelRatio(2)
+
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     this.renderer.setPixelRatio(window.devicePixelRatio)
 
     this.renderer.shadowMap.enabled = true
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
+    this.renderer.physicallyCorrectLights = true
+    this.renderer.gammaFactor = 2.2
+    this.renderer.gammaOutPut = true
+    this.renderer.autoClear = false
+
     document.body.appendChild(this.renderer.domElement)
+
+    // Resize event
+    // this.sizes.on('resize', () =>
+    // {
+    //     this.renderer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
+    // })
   }
 
   addControls () {
@@ -244,6 +281,13 @@ export default class App {
     gui2.addColor(obj, 'color2').onChange(color => {
       ambLight2.color = hexToRgbTreeJs(color)
     })
+
+    this.addOtherLight()
+    this.addSpotLight()
+    this.addRectLight()
+    this.addPointLight(0xfff000, { x: 0, y: 10, z: -100 })
+    this.addPointLight(0x79573e, { x: 100, y: 10, z: 0 })
+    this.addPointLight(0xc27439, { x: 20, y: 5, z: 20 })
   }
 
   addSpotLight () {
@@ -593,52 +637,6 @@ export default class App {
     return mesh
   }
 
-  init () {
-    this.setup()
-
-    this.createScene()
-
-    this.setConfig()
-
-    this.addControls()
-
-    this.createCamera()
-
-    this.createControls()
-
-    this.createGrid()
-
-    this.addFloor()
-
-    this.addAmbientLight()
-
-    this.addOtherLight()
-
-    this.addSpotLight()
-
-    this.addRectLight()
-
-    this.addPointLight(0xfff000, { x: 0, y: 10, z: -100 })
-
-    this.addPointLight(0x79573e, { x: 100, y: 10, z: 0 })
-
-    this.addPointLight(0xc27439, { x: 20, y: 5, z: 20 })
-
-    this.animate()
-
-    window.addEventListener('resize', this.onResize.bind(this))
-
-    window.addEventListener('mousemove', this.onMouseMove.bind(this), false)
-
-    this.onMouseMove({ clientX: 0, clientY: 0 })
-    // Draw guides
-    // this.drawGuides()
-    // Apply buttons
-    this.setupButtons()
-
-    this.setPasses()
-  }
-
   onMouseMove ({ clientX, clientY }) {
     this.mouse3D.x = (clientX / this.width) * 2 - 1
     this.mouse3D.y = -(clientY / this.height) * 2 + 1
@@ -659,6 +657,12 @@ export default class App {
     // console.log('camera pos: ' + JSON.stringify(this.camera.position))
 
     this.renderer.render(this.scene, this.camera)
+
+    this.passes.horizontalBlurPass.enabled = this.passes.horizontalBlurPass.material.uniforms.uStrength.value.x > 0
+    this.passes.verticalBlurPass.enabled = this.passes.verticalBlurPass.material.uniforms.uStrength.value.y > 0
+
+    // // Renderer
+    this.passes.composer.render()
 
     requestAnimationFrame(this.animate.bind(this))
   }
@@ -681,6 +685,7 @@ export default class App {
 
         // Create passes
         this.passes.renderPass = new RenderPass(this.scene, this.camera.instance)
+
 
         this.passes.horizontalBlurPass = new ShaderPass(BlurPass)
         this.passes.horizontalBlurPass.strength = this.config.touch ? 0 : 1
@@ -727,32 +732,38 @@ export default class App {
         }
 
         // Add passes
+
+        // var copyPass = new THREE.ShaderPass( new THREE.CopyShader );
+        // copyPass.renderToScreen = true;
+
+        // this.passes.composer.addPass(copyPass)
+
         this.passes.composer.addPass(this.passes.renderPass)
         this.passes.composer.addPass(this.passes.horizontalBlurPass)
         this.passes.composer.addPass(this.passes.verticalBlurPass)
         this.passes.composer.addPass(this.passes.glowsPass)
 
         // Time tick
-        this.time.on('tick', () =>
-        {
-            this.passes.horizontalBlurPass.enabled = this.passes.horizontalBlurPass.material.uniforms.uStrength.value.x > 0
-            this.passes.verticalBlurPass.enabled = this.passes.verticalBlurPass.material.uniforms.uStrength.value.y > 0
+        // this.time.on('tick', () =>
+        // {
+        //     this.passes.horizontalBlurPass.enabled = this.passes.horizontalBlurPass.material.uniforms.uStrength.value.x > 0
+        //     this.passes.verticalBlurPass.enabled = this.passes.verticalBlurPass.material.uniforms.uStrength.value.y > 0
 
-            // Renderer
-            this.passes.composer.render()
-            // this.renderer.domElement.style.background = 'black'
-            // this.renderer.render(this.scene, this.camera.instance)
-        })
+        //     // Renderer
+        //     this.passes.composer.render()
+        //     // this.renderer.domElement.style.background = 'black'
+        //     // this.renderer.render(this.scene, this.camera.instance)
+        // })
 
         // Resize event
-        this.sizes.on('resize', () =>
-        {
-            this.renderer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
-            this.passes.composer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
-            this.passes.horizontalBlurPass.material.uniforms.uResolution.value.x = this.sizes.viewport.width
-            this.passes.horizontalBlurPass.material.uniforms.uResolution.value.y = this.sizes.viewport.height
-            this.passes.verticalBlurPass.material.uniforms.uResolution.value.x = this.sizes.viewport.width
-            this.passes.verticalBlurPass.material.uniforms.uResolution.value.y = this.sizes.viewport.height
-        })
+        // this.sizes.on('resize', () =>
+        // {
+        //     this.renderer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
+        //     this.passes.composer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
+        //     this.passes.horizontalBlurPass.material.uniforms.uResolution.value.x = this.sizes.viewport.width
+        //     this.passes.horizontalBlurPass.material.uniforms.uResolution.value.y = this.sizes.viewport.height
+        //     this.passes.verticalBlurPass.material.uniforms.uResolution.value.x = this.sizes.viewport.width
+        //     this.passes.verticalBlurPass.material.uniforms.uResolution.value.y = this.sizes.viewport.height
+        // })
     }
 }
