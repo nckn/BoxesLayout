@@ -1,4 +1,4 @@
-import RoundedBoxGeometry from '../vendor/roundedBox';
+import RoundedBoxGeometry from './roundedBox';
 
 export default class Box {
   constructor() {
