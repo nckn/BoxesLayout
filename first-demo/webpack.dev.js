@@ -1,6 +1,7 @@
-const merge = require('webpack-merge');
-const common = require('./webpack.common.js');
-const webpack = require('webpack');
+const merge = require('webpack-merge')
+const common = require('./webpack.common.js')
+const webpack = require('webpack')
+const path = require('path');
 
 module.exports = merge(common, {
   mode: 'development',
@@ -14,15 +15,18 @@ module.exports = merge(common, {
     rules: [
       {
         test: /\.scss$/,
-        use: [
-          'style-loader',
-          'css-loader',
-          'sass-loader'
-        ]
+        use: ['style-loader', 'css-loader', 'sass-loader']
       },
+      {
+        test: /\.glsl$/,
+        loader: 'webpack-glsl-loader'
+      }
     ]
   },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin()
-  ]
-});
+  resolve: {
+    alias: {
+      Scripts: path.resolve(__dirname, './src/scripts/'),
+    }
+  },
+  plugins: [new webpack.HotModuleReplacementPlugin()]
+})

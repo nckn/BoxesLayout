@@ -1,3 +1,7 @@
+// import shaderFragment from '../shaders/blur/fragment.glsl'
+// import shaderVertex from '../shaders/blur/vertex.glsl'
+// import shaderFragment from 'Scripts/shaders/blur/fragment.glsl'
+// import shaderVertex from 'Scripts/shaders/blur/vertex.glsl'
 import shaderFragment from '../shaders/blur/fragment.glsl'
 import shaderVertex from '../shaders/blur/vertex.glsl'
 
